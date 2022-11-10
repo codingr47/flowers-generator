@@ -1,0 +1,16 @@
+.menuSelected {
+	background-color:#bad1f5 !important;
+	opacity: 0.5;
+	color:#000;
+	transition: background-color, color 0.5s linear;
+}
+
+.containerRoot {
+	display: flex;
+	flex-direction: column;
+}
+
+.drawerPaper {
+	top:64px !important;
+	min-width:300px;
+}
