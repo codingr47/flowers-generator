@@ -39,3 +39,10 @@ export type MutatePostRenderParamsFunction = (data: Partial<PostRenderParams>) =
 export type HandlerProps = {
 	mutatePostRenderParams: MutatePostRenderParamsFunction;
 }
+
+export type GraphicsHandlerReturnType = {
+	draw: () => void;
+	update: (props: GraphicsProps) => void;
+	clear: () => void;
+	destroy: () => void;
+}

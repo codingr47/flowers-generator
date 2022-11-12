@@ -7,7 +7,7 @@ import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Drawer from "@mui/material/Drawer";
 import { MenuItem, Typography } from "@mui/material";
-import { GraphicsProps, MutateGraphicParamsFunction, MutatePostRenderParamsFunction, PostRenderParams, ViewMode } from "./types";
+import { GraphicsHandlerReturnType, GraphicsProps, MutateGraphicParamsFunction, MutatePostRenderParamsFunction, PostRenderParams, ViewMode } from "./types";
 import ViewControllers from "./viewControllers";
 import twoDHandler from "./twoDHandler";
 const css = require("./css/App.css");
@@ -20,7 +20,6 @@ export default function App() {
 		if (viewMode === mode) setViewMode(undefined);
 		else setViewMode(mode);
 	}
-	const [showViewport, setShowVieport] = useState<boolean>(true);
 	const classesMenuItem = {
 		selected: css.menuSelected,
 	};
@@ -53,25 +52,22 @@ export default function App() {
 		setPostRenderParams(newObj);
 	}
 
-	const viewTimeoutRef = useRef<NodeJS.Timeout | undefined>();
+	const renderingHandler = useRef<GraphicsHandlerReturnType | undefined>();
 	useEffect(() => { 
 		if (viewMode) {
 			const sidebar = document.querySelector("#sidebar > div");
 			const displayPortWidth = document.body.clientWidth - sidebar.clientWidth; 
 			const topbar = document.getElementById("topbar");
 			const displayPortHeight = document.body.clientHeight - topbar.clientHeight;
-
-			setShowVieport(false);
-			if (viewTimeoutRef.current) {
-				clearTimeout(viewTimeoutRef.current);
+			if (!renderingHandler.current) {
+				renderingHandler.current = twoDHandler({ ...graphicsParams, width: displayPortWidth, height: displayPortHeight, mutatePostRenderParams });
 			}
-			viewTimeoutRef.current = setTimeout(() => { 
-				setShowVieport(true);
-				twoDHandler({ ...graphicsParams, width: displayPortWidth, height: displayPortHeight, mutatePostRenderParams });
-			}, 50);
-			
+			renderingHandler.current.clear();
+			renderingHandler.current.update(graphicsParams);
+			renderingHandler.current.draw();
 		} else {
-			setShowVieport(false);
+			renderingHandler.current?.destroy();
+			renderingHandler.current = undefined;
 		}
 	}, [viewMode, graphicsParams]);
 
@@ -131,7 +127,7 @@ export default function App() {
 				</Drawer>
 			</Box>
 			<Box>
-				{showViewport && <div id="displayPort" style={{width: `${canvasDimensions.width || 0}px`, height: `${canvasDimensions.height || 0}px` }} />}
+				<div id="displayPort" style={{width: `${canvasDimensions.width || 0}px`, height: `${canvasDimensions.height || 0}px` }} />
 			</Box>
 		</Container>
 	);
