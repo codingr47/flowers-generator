@@ -9,7 +9,7 @@ import Drawer from "@mui/material/Drawer";
 import { MenuItem, Typography } from "@mui/material";
 import { GraphicsHandlerReturnType, GraphicsProps, MutateGraphicParamsFunction, MutatePostRenderParamsFunction, PostRenderParams, ViewMode } from "./types";
 import ViewControllers from "./viewControllers";
-import twoDHandler from "./twoDHandler";
+import graphicsHandlers from "./graphicsHandlers";
 const css = require("./css/App.css");
 
 const APPLICATION_GRAPHICS_PARAMS_KEY = "graphicsParam";
@@ -60,7 +60,7 @@ export default function App() {
 			const topbar = document.getElementById("topbar");
 			const displayPortHeight = document.body.clientHeight - topbar.clientHeight;
 			if (!renderingHandler.current) {
-				renderingHandler.current = twoDHandler({ ...graphicsParams, width: displayPortWidth, height: displayPortHeight, mutatePostRenderParams });
+				renderingHandler.current = graphicsHandlers[viewMode]({ ...graphicsParams, width: displayPortWidth, height: displayPortHeight, mutatePostRenderParams });
 			}
 			renderingHandler.current.clear();
 			renderingHandler.current.update(graphicsParams);
@@ -89,16 +89,16 @@ export default function App() {
 			<Box>
 				<AppBar>
 					<Toolbar id="topbar">
-						<MenuItem onClick={() => toggleViewMode("2DView")} selected={"2DView" === viewMode}
+						<MenuItem onClick={() => toggleViewMode("Step1_2DView")} selected={"Step1_2DView" === viewMode}
 							classes={classesMenuItem}
 						>
-							<Typography textAlign="center">2D View</Typography>
+							<Typography textAlign="center">Design Shape (2D)</Typography>
 						</MenuItem>
 						<MenuItem 
-							onClick={() => toggleViewMode("3DView")}  selected={"3DView" === viewMode}
+							onClick={() => toggleViewMode("Step2_3DView")}  selected={"Step2_3DView" === viewMode}
 							classes={classesMenuItem}
 						>
-							<Typography textAlign="center">3D View</Typography>
+							<Typography textAlign="center">Design Shape (3D)</Typography>
 						</MenuItem>
 						<div style={{ position: "absolute", right: 0, width:"300px", backgroundColor: "#000", opacity: 0.5, minHeight:"60px", display:"flex", flexDirection: "column"}}>
 							{

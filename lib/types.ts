@@ -1,4 +1,4 @@
-export type ViewMode = "2DView" | "3DView"; 
+export type ViewMode = "Step1_2DView" | "Step2_3DView"; 
 
 export const ConstructionModeEnum = {
 	Lines: "lines",

@@ -271,12 +271,12 @@ function threeDComponents() {
 
 export default function ({ viewMode, mutateGraphicsParams, values }: Props) {
 	const getComponentsByViewMode = () => { 
-		if ("2DView" === viewMode) {
+		if ("Step1_2DView" === viewMode) {
 			return twoDComponents({
 				mutateGraphicsParams,
 				values,
 			});
-		} else if("3DView" === viewMode) {
+		} else if("Step2_3DView" === viewMode) {
 			return threeDComponents();
 		} else {
 			return <div />;

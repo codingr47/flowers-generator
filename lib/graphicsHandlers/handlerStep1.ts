@@ -5,7 +5,7 @@ import {
 	GraphicsHandlerReturnType,
 	GraphicsProps,
 	HandlerProps,
-} from "./types";
+} from "../types";
 
 
 function getElipseY(x: number, a: number, b: number, r: number,   plus: boolean) { 
