@@ -37,6 +37,10 @@ export default function App() {
 		backgroundColor: 0xFFEEEE,
 		lineColor: 0xFF0000,
 		constructionMode: "lines",
+		extrudeSettings: {
+			depth: 0,
+			steps: 0,
+		}
 	});
 
 	const [postRenderParams, setPostRenderParams] = useState<PostRenderParams>({});
@@ -53,18 +57,21 @@ export default function App() {
 	}
 
 	const renderingHandler = useRef<GraphicsHandlerReturnType | undefined>();
+	const lastViewMode = useRef<ViewMode | undefined>(); 
 	useEffect(() => { 
 		if (viewMode) {
 			const sidebar = document.querySelector("#sidebar > div");
 			const displayPortWidth = document.body.clientWidth - sidebar.clientWidth; 
 			const topbar = document.getElementById("topbar");
 			const displayPortHeight = document.body.clientHeight - topbar.clientHeight;
-			if (!renderingHandler.current) {
+			if (!renderingHandler.current || (lastViewMode.current && lastViewMode.current !== viewMode) ) {
+				renderingHandler.current?.destroy();
 				renderingHandler.current = graphicsHandlers[viewMode]({ ...graphicsParams, width: displayPortWidth, height: displayPortHeight, mutatePostRenderParams });
 			}
 			renderingHandler.current.clear();
 			renderingHandler.current.update(graphicsParams);
 			renderingHandler.current.draw();
+			lastViewMode.current = viewMode;
 		} else {
 			renderingHandler.current?.destroy();
 			renderingHandler.current = undefined;

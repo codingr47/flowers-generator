@@ -17,7 +17,18 @@ export type GraphicsProps = {
 	backgroundColor: number;
 	lineColor: number;
 	constructionMode: ReverseMap<typeof ConstructionModeEnum>;
+	extrudeSettings: {
+		steps: number;
+		depth: number;
+		bevel?: {
+			thickness?: number;
+			size?: number;
+			offset?: number;
+			segments?: number;
+		}
+	};
 	wireFrame?: boolean;
+	
 } 
 
 export type PostRenderParams = {

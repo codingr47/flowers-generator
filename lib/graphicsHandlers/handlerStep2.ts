@@ -30,6 +30,7 @@ export default function({
 	const scene = new THREE.Scene();
 	const renderer = new THREE.WebGLRenderer({});
 	let points: THREE.Vector3[] = [];
+	let mainObjectsGroup: THREE.Group = new THREE.Group();
 	const minLeft = -0.5;
 	const displayPort = document.getElementById("displayPort");
 	let sceneObjects: THREE.Object3D[] = [];
@@ -41,8 +42,19 @@ export default function({
 	const camera = new THREE.PerspectiveCamera( 45,screenWidth / screenHeight, 1, -50 );
 	camera.position.set(0, 0, 500);
 	camera.lookAt( 0, 0, 0);
-	let deg = 1;
-
+	const moveMouse = ({ movementX, movementY, buttons }: MouseEvent) => {
+		if (1 === buttons) { 
+			if (Math.abs(movementY)  > 0) { 
+				mainObjectsGroup.rotateZ(degToRad(movementY));
+			}
+			if (Math.abs(movementX)  > 0) { 
+				mainObjectsGroup.rotateX(degToRad(movementX));
+				
+			}
+			renderer.render(scene, camera);
+		}
+	}
+	renderer.domElement.addEventListener("mousemove", moveMouse);
 	return {
 		update: (props) => {
 			currentProps = props;
@@ -56,7 +68,8 @@ export default function({
 				numberLeaves,
 				radius,
 				smoothIndex,
-				wireFrame
+				wireFrame,
+				extrudeSettings,
 			} = currentProps;
 			const scaler = elipseScaler;
 			const incremental = 1 - smoothIndex;
@@ -71,39 +84,25 @@ export default function({
 			points.push(points[0]);
 			const material = new THREE.MeshBasicMaterial( { color: lineColor, side: THREE.DoubleSide, wireframe: wireFrame || false, } );
 			const degrees = 360 / numberLeaves;
-			if ("lines" === constructionMode) {
-				const geometry = new THREE.BufferGeometry().setFromPoints(points);
-				const line = new THREE.Line( geometry, material );
-				line.scale.set(scaler, scaler, 1.0);
-				const lines: { obj: THREE.Line; direction: THREE.Vector3 }[] = []; 
-				for(let i = 0; i<numberLeaves; i++) {
-					const newLine = line.clone();
-					const degreesIteration =  degToRad(degrees * i);
-					newLine.rotateOnAxis(new THREE.Vector3(0, 0, 1), degreesIteration);
-					const direction = new THREE.Vector3(Math.cos(degreesIteration), Math.sin(degreesIteration), 0);
-					const newPos = direction.multiplyScalar(scaler * r);
-					newLine.position.set(newPos.x, newPos.y, newPos.z);
-					scene.add(newLine);
-					lines.push({ obj: newLine, direction: direction.normalize() });
-					sceneObjects.push(newLine);
-				}
-
-			} else {
-				const shape = new THREE.Shape(points.map(({ x, y }) => new THREE.Vector2(x, y)));
-				const geometry = new THREE.ShapeGeometry(shape);
-				const mesh = new THREE.Mesh(geometry, material);
-				mesh.scale.set(scaler, scaler, 1.0);
-				for(let i = 0; i<numberLeaves; i++) {
-					const newMesh = mesh.clone();
-					const degreesIteration =  degToRad(degrees * i);
-					newMesh.rotateOnAxis(new THREE.Vector3(0, 0, 1), degreesIteration);
-					const direction = new THREE.Vector3(Math.cos(degreesIteration), Math.sin(degreesIteration), 0);
-					const newPos = direction.multiplyScalar(scaler * r);
-					newMesh.position.set(newPos.x, newPos.y, newPos.z);
-					sceneObjects.push(newMesh);				
-					scene.add(newMesh);
-				}
+			const shape = new THREE.Shape(points.map(({ x, y }) => new THREE.Vector2(x, y)));
+			const gemoetryExtruded = new THREE.ExtrudeGeometry(shape, {
+				steps: extrudeSettings.steps,
+				depth: extrudeSettings.depth,
+			});
+			const mesh = new THREE.Mesh(gemoetryExtruded, material);
+			mesh.scale.set(scaler, scaler, 1.0);
+			for(let i = 0; i<numberLeaves; i++) {
+				const newMesh = mesh.clone();
+				const degreesIteration =  degToRad(degrees * i);
+				newMesh.rotateOnAxis(new THREE.Vector3(0, 0, 1), degreesIteration);
+				const direction = new THREE.Vector3(Math.cos(degreesIteration), Math.sin(degreesIteration), 0);
+				const newPos = direction.multiplyScalar(scaler * r);
+				newMesh.position.set(newPos.x, newPos.y, newPos.z);
+				sceneObjects.push(newMesh);	
+				mainObjectsGroup.add(newMesh);			
+				//scene.add(newMesh);
 			}
+			scene.add(mainObjectsGroup);
 			renderer.setClearColor( backgroundColor, 1 );
 		},
 		clear: () => { 

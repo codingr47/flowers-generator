@@ -261,23 +261,206 @@ function twoDComponents({ mutateGraphicsParams, values }: { mutateGraphicsParams
 	);
 }
 
-function threeDComponents() {
+function threeDComponents({ mutateGraphicsParams, values }: { mutateGraphicsParams: Props["mutateGraphicsParams"]; values: Props["values"] }) {
+	const [currentTab, setCurrentTab] = React.useState(0);
+	const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+		setCurrentTab(newValue);
+	};
 	return (
-		<div>
-			asdzxcvmasdkj
-		</div>
+		<>
+			 <Tabs value={currentTab} onChange={handleTabChange} aria-label="basic tabs example" classes={{
+				 scroller: css.scroller,
+			 }}>
+				<Tab label="Shape Properties" />
+				<Tab label="Extrusion" />
+				<Tab label="Colors" />
+			</Tabs>
+			<TabPanel value={currentTab} index={0}>
+				<List>
+					<SliderComponent
+						step={1}
+						defaultVal={values["wireFrame"] ? 1 : 0}
+						max={1}
+						min={0}
+						text="Wireframe ?"
+						id="wireFrame"
+						mutateGraphicsParams={mutateGraphicsParams}
+						onChange = {(v) => { 
+							mutateGraphicsParams({ wireFrame: 1 === v ? true : false }); 
+						}}
+					/>
+				</List>
+			</TabPanel>
+			<TabPanel value={currentTab} index={1}>
+					<SliderComponent
+						step={1}
+						defaultVal={values.extrudeSettings.steps}
+						max={10}
+						min={0}
+						text="Extrude Steps"
+						id="extrudeSettings"
+						mutateGraphicsParams={mutateGraphicsParams}
+						onChange = {(v) => { 
+							mutateGraphicsParams({
+								extrudeSettings: {
+									...values.extrudeSettings,
+									steps: v,
+								}
+							}); 
+						}}
+					/>	
+					<SliderComponent
+						step={1}
+						defaultVal={values.extrudeSettings.depth}
+						max={10}
+						min={0}
+						text="Extrude Depth"
+						id="extrudeSettings"
+						mutateGraphicsParams={mutateGraphicsParams}
+						onChange = {(v) => { 
+							mutateGraphicsParams({
+								extrudeSettings: {
+									...values.extrudeSettings,
+									depth: v,
+								}
+							}); 
+						}}
+					/>
+					<SliderComponent
+						step={1}
+						defaultVal={!!values.extrudeSettings.bevel ? 1 : 0}
+						max={1}
+						min={0}
+						text="Bevel?"
+						id="extrudeSettings"
+						mutateGraphicsParams={mutateGraphicsParams}
+						onChange = {(v) => { 
+							mutateGraphicsParams({
+								extrudeSettings: {
+									...values.extrudeSettings,
+									bevel: 1 === v  ? {} : undefined,
+								}
+							}); 
+						}}
+					/>	
+					{
+						!!values.extrudeSettings.bevel ? (
+							[
+								<SliderComponent
+									step={1}
+									defaultVal={values.extrudeSettings.bevel.offset || 0}
+									max={10}
+									min={0}
+									text="Bevel Offset"
+									id="extrudeSettings"
+									mutateGraphicsParams={mutateGraphicsParams}
+									onChange = {(v) => { 
+										mutateGraphicsParams({
+											extrudeSettings: {
+												...values.extrudeSettings,
+												bevel: {
+													...values.extrudeSettings.bevel,
+													offset: v,
+												}
+											}
+										}); 
+									}}
+								/>,
+								<SliderComponent
+									step={1}
+									defaultVal={values.extrudeSettings.bevel.segments || 0}
+									max={10}
+									min={0}
+									text="Bevel Segments"
+									id="extrudeSettings"
+									mutateGraphicsParams={mutateGraphicsParams}
+									onChange = {(v) => { 
+										mutateGraphicsParams({
+											extrudeSettings: {
+												...values.extrudeSettings,
+												bevel: {
+													...values.extrudeSettings.bevel,
+													segments: v,
+												}
+											}
+										}); 
+									}}
+								/>,
+								<SliderComponent
+									step={1}
+									defaultVal={values.extrudeSettings.bevel.size || 0}
+									max={10}
+									min={0}
+									text="Bevel Size"
+									id="extrudeSettings"
+									mutateGraphicsParams={mutateGraphicsParams}
+									onChange = {(v) => { 
+										mutateGraphicsParams({
+											extrudeSettings: {
+												...values.extrudeSettings,
+												bevel: {
+													...values.extrudeSettings.bevel,
+													size: v,
+												}
+											}
+										}); 
+									}}
+								/>,
+								<SliderComponent
+									step={1}
+									defaultVal={values.extrudeSettings.bevel.thickness || 0}
+									max={10}
+									min={0}
+									text="Bevel Thickness"
+									id="extrudeSettings"
+									mutateGraphicsParams={mutateGraphicsParams}
+									onChange = {(v) => { 
+										mutateGraphicsParams({
+											extrudeSettings: {
+												...values.extrudeSettings,
+												bevel: {
+													...values.extrudeSettings.bevel,
+													thickness: v,
+												}
+											}
+										}); 
+									}}
+								/>,
+							]
+						) : []
+					}
+
+			</TabPanel>
+			<TabPanel value={currentTab} index={2}>
+				<List>
+					<ColorPicker 
+						id="backgroundColor"
+						mutateGraphicsParams={mutateGraphicsParams}
+						text="Background Color"
+						defaultVal={values["backgroundColor"]}
+					/>
+					<ColorPicker 
+						id="lineColor"
+						mutateGraphicsParams={mutateGraphicsParams}
+						text="Shape's Color"
+						defaultVal={values["lineColor"]}
+					/>
+				</List>
+			</TabPanel>
+		</>
 	);
 }
 
 export default function ({ viewMode, mutateGraphicsParams, values }: Props) {
 	const getComponentsByViewMode = () => { 
+		const baseHandlerParams = {
+			mutateGraphicsParams,
+			values,
+		};
 		if ("Step1_2DView" === viewMode) {
-			return twoDComponents({
-				mutateGraphicsParams,
-				values,
-			});
+			return twoDComponents(baseHandlerParams);
 		} else if("Step2_3DView" === viewMode) {
-			return threeDComponents();
+			return threeDComponents(baseHandlerParams);
 		} else {
 			return <div />;
 		}
